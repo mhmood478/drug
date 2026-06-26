@@ -246,13 +246,39 @@ const STARTER_DRUGS = [
   }
 ];
 
-let drugs = JSON.parse(localStorage.getItem("edDrugsData") || "null") || STARTER_DRUGS;
+// 1. Paste your Firebase Configuration here
+const firebaseConfig = {
+  apiKey: "AIzaSyA-clqoD7YiAxQbI1WRg4A5hhRup4YuyrE",
+  authDomain: "ed-drugs.firebaseapp.com",
+  projectId: "ed-drugs",
+  storageBucket: "ed-drugs.firebasestorage.app",
+  messagingSenderId: "101110196513",
+  appId: "1:101110196513:web:40559131c06e8254093660"
+};
+
+// 2. Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const drugsCollection = db.collection("drugs");
+
+// Local cache array to keep track of items loaded from Firestore
+let drugs = [];
 let editIndex = null;
 
 const el = id => document.getElementById(id);
 
-function saveToStorage() {
-  localStorage.setItem("edDrugsData", JSON.stringify(drugs));
+// 3. Fetch Data in Real-Time from Firestore
+function initRealtimeUpdates() {
+  drugsCollection.onSnapshot((snapshot) => {
+    drugs = [];
+    snapshot.forEach((doc) => {
+      // We append the unique Firestore document ID to each drug object
+      drugs.push({ id: doc.id, ...doc.data() });
+    });
+    render();
+  }, (error) => {
+    console.error("Error reading from Firestore: ", error);
+  });
 }
 
 function categories() {
@@ -335,8 +361,8 @@ function closeForm() {
   el("formPanel").classList.add("hidden");
 }
 
-function saveDrug() {
-  const drug = {
+async function saveDrug() {
+  const drugData = {
     category: el("category").value || "Other",
     name: el("name").value.trim(),
     adult: el("adult").value.trim(),
@@ -344,32 +370,47 @@ function saveDrug() {
     indication: el("indication").value.trim()
   };
 
-  if (!drug.name || !drug.adult || !drug.peds || !drug.indication) {
+  if (!drugData.name || !drugData.adult || !drugData.peds || !drugData.indication) {
     alert("Fill all fields.");
     return;
   }
 
-  if (editIndex === null) drugs.push(drug);
-  else drugs[editIndex] = drug;
-
-  saveToStorage();
-  closeForm();
-  render();
+  try {
+    if (editIndex === null) {
+      // Create new document in cloud
+      await drugsCollection.add(drugData);
+    } else {
+      // Update existing document using its cloud ID
+      const drugId = drugs[editIndex].id;
+      await drugsCollection.doc(drugId).set(drugData);
+    }
+    closeForm();
+  } catch (error) {
+    console.error("Error saving document: ", error);
+    alert("Error saving data to the cloud.");
+  }
 }
 
 function editDrug(i) {
   openForm(i);
 }
 
-function deleteDrug(i) {
+async function deleteDrug(i) {
   if (!confirm("Delete this drug?")) return;
-  drugs.splice(i, 1);
-  saveToStorage();
-  render();
+  
+  try {
+    const drugId = drugs[i].id;
+    await drugsCollection.doc(drugId).delete();
+  } catch (error) {
+    console.error("Error deleting document: ", error);
+    alert("Error deleting data from cloud.");
+  }
 }
 
 function exportBackup() {
-  const blob = new Blob([JSON.stringify(drugs, null, 2)], { type: "application/json" });
+  // Clean up IDs out of backups so they can be clean entry arrays
+  const cleanBackup = drugs.map(({id, ...rest}) => rest);
+  const blob = new Blob([JSON.stringify(cleanBackup, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "ed-drugs-backup.json";
@@ -378,21 +419,44 @@ function exportBackup() {
 
 function importBackup(file) {
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try {
       const imported = JSON.parse(reader.result);
       if (!Array.isArray(imported)) throw new Error("Invalid file");
-      drugs = imported;
-      saveToStorage();
-      render();
-      alert("Backup imported.");
-    } catch {
-      alert("Invalid backup file.");
+      
+      if(confirm(`This will append ${imported.length} items to your online database. Proceed?`)) {
+        const batch = db.batch();
+        imported.forEach(item => {
+          const docRef = drugsCollection.doc(); // assign random ID
+          batch.set(docRef, item);
+        });
+        await batch.commit();
+        alert("Backup batch successfully pushed to cloud database!");
+      }
+    } catch (e) {
+      alert("Invalid backup file or cloud database error.");
     }
   };
   reader.readAsText(file);
 }
 
+// 4. Initializing Seed Data if cloud database is empty
+async function checkAndSeedDatabase() {
+  const snapshot = await drugsCollection.limit(1).get();
+  if (snapshot.empty) {
+    // If you have starter records defined previously
+    if (typeof STARTER_DRUGS !== 'undefined' && STARTER_DRUGS.length > 0) {
+      const batch = db.batch();
+      STARTER_DRUGS.forEach((drug) => {
+        const docRef = drugsCollection.doc();
+        batch.set(docRef, drug);
+      });
+      await batch.commit();
+    }
+  }
+}
+
+// Event Listeners
 el("search").addEventListener("input", render);
 el("categoryFilter").addEventListener("change", render);
 el("addNewBtn").addEventListener("click", () => openForm());
@@ -402,6 +466,13 @@ el("exportBtn").addEventListener("click", exportBackup);
 el("importFile").addEventListener("change", e => e.target.files[0] && importBackup(e.target.files[0]));
 
 if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+
+// Kickstart database evaluation and connection listener
+checkAndSeedDatabase().then(() => {
+  initRealtimeUpdates();
+});
   navigator.serviceWorker.register("service-worker.js");
 }
 

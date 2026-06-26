@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ED Drugs" />
+  <title>ED Drugs</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>ED Drugs</h1>
+    <p>Adult dose <span>(pediatric dose)</span> · editable offline</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <input id="search" type="search" placeholder="Search drug, dose, indication..." />
+      <select id="categoryFilter"><option value="All">All categories</option></select>
+      <div class="actions">
+        <button id="addNewBtn">Add new</button>
+        <button id="exportBtn">Export backup</button>
+        <label class="importLabel">Import backup<input id="importFile" type="file" accept="application/json" /></label>
+      </div>
+    </section>
+
+    <section id="formPanel" class="panel hidden">
+      <h2 id="formTitle">Add drug</h2>
+      <input id="name" placeholder="Drug name" />
+      <input id="adult" placeholder="Adult dose" />
+      <input id="peds" placeholder="Pediatric dose in brackets" />
+      <input id="indication" placeholder="Indication" />
+      <select id="category"></select>
+      <div class="actions two">
+        <button id="saveBtn">Save</button>
+        <button id="cancelBtn" class="secondary">Cancel</button>
+      </div>
+    </section>
+
+    <section id="drugList"></section>
+  </main>
+
+  <footer>
+    Quick reference only. Confirm local protocols, concentrations, max doses, allergies, renal/hepatic adjustment, and patient-specific factors.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

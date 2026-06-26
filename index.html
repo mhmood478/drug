@@ -10,7 +10,7 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 
     <div class="max-w-7xl mx-auto px-4 py-6">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-slate-200 pb-5">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-slate-200 pb-5">
             <div class="flex items-center gap-3">
                 <div class="bg-red-500 text-white p-2.5 rounded-lg shadow-md shadow-red-100">
                     <i class="fa-solid fa-kit-medical text-2xl"></i>
@@ -28,13 +28,20 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1">
-                <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-200 sticky top-6">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <div class="space-y-6">
+            
+            <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+                <button id="toggleFormBtn" class="w-full px-6 py-4 flex justify-between items-center bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer text-left">
+                    <span class="text-base font-semibold text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-plus-circle text-blue-500"></i> Add New ER Drug
-                    </h2>
-                    <form id="drugForm" class="space-y-4">
+                    </span>
+                    <span id="toggleIcon" class="text-slate-500 bg-white border border-slate-200 rounded-full w-7 h-7 flex items-center justify-center transition-transform duration-200">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </span>
+                </button>
+
+                <div id="formContainer" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                    <form id="drugForm" class="p-6 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Drug Name</label>
                             <input type="text" id="drugName" required placeholder="e.g., Epinephrine, Amiodarone" 
@@ -45,32 +52,32 @@
                             <input type="text" id="indication" required placeholder="e.g., Anaphylaxis, Cardiac Arrest" 
                                 class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Adult Dose</label>
-                                <textarea id="adultDose" required rows="2" placeholder="e.g., 0.3 mg IM" 
-                                    class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Pediatric Dose</label>
-                                <textarea id="peadsDose" required rows="2" placeholder="e.g., 0.01 mg/kg IM" 
-                                    class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Adult Dose</label>
+                            <textarea id="adultDose" required rows="2" placeholder="e.g., 0.3 mg IM" 
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
                         </div>
                         <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Pediatric Dose</label>
+                            <textarea id="peadsDose" required rows="2" placeholder="e.g., 0.01 mg/kg IM" 
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
                             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tags (Comma separated)</label>
                             <input type="text" id="tags" placeholder="e.g., Resuscitation, Allergy, Sedative" 
                                 class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <button type="submit" 
-                            class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs">
-                            <i class="fa-solid fa-floppy-disk"></i> Save to Database
-                        </button>
+                        <div class="md:col-span-2 flex justify-end gap-3 pt-2">
+                            <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-md text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs">
+                                <i class="fa-solid fa-floppy-disk"></i> Save to Database
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
 
-            <div class="lg:col-span-2">
+            <div>
                 <div id="loadingState" class="text-center py-12 text-slate-400">
                     <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
                     <p class="text-sm">Connecting to Firebase...</p>
@@ -82,7 +89,7 @@
                     <p class="text-xs max-w-xs mx-auto mt-1">Add your first critical medication or clear your search filter.</p>
                 </div>
 
-                <div id="drugGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div id="drugGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     </div>
             </div>
         </div>
@@ -112,8 +119,26 @@ const firebaseConfig = {
         const searchInput = document.getElementById('searchInput');
         const loadingState = document.getElementById('loadingState');
         const emptyState = document.getElementById('emptyState');
+        
+        // Collapsible UI elements
+        const toggleFormBtn = document.getElementById('toggleFormBtn');
+        const formContainer = document.getElementById('formContainer');
+        const toggleIcon = document.getElementById('toggleIcon');
 
         let allDrugs = []; // Local memory cache for live filtering
+
+        // Toggle Accordion Collapse/Expand Functionality
+        toggleFormBtn.addEventListener('click', () => {
+            const isCollapsed = formContainer.style.maxHeight === '0px' || !formContainer.style.maxHeight;
+            
+            if (isCollapsed) {
+                formContainer.style.maxHeight = formContainer.scrollHeight + "px";
+                toggleIcon.style.transform = "rotate(180deg)";
+            } else {
+                formContainer.style.maxHeight = "0px";
+                toggleIcon.style.transform = "rotate(0deg)";
+            }
+        });
 
         // 1. Fetch data in real-time
         onSnapshot(drugsCollection, (snapshot) => {
@@ -201,6 +226,9 @@ const firebaseConfig = {
             try {
                 await addDoc(drugsCollection, newDrug);
                 drugForm.reset();
+                // Automatically close form wrapper on successful save
+                formContainer.style.maxHeight = "0px";
+                toggleIcon.style.transform = "rotate(0deg)";
             } catch (error) {
                 alert("Error writing document to Firestore: " + error.message);
             }

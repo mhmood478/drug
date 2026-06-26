@@ -1,55 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1220" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="ED Drugs" />
-  <title>ED Drugs</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ER Formulary Quick-Reference</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-  <header>
-    <h1>ED Drugs</h1>
-    <p>Adult dose <span>(pediatric dose)</span> · editable offline</p>
-  </header>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
 
-  <main>
-    <section class="panel">
-      <input id="search" type="search" placeholder="Search drug, dose, indication..." />
-      <select id="categoryFilter"><option value="All">All categories</option></select>
-      <div class="actions">
-        <button id="addNewBtn">Add new</button>
-        <button id="exportBtn">Export backup</button>
-        <label class="importLabel">Import backup<input id="importFile" type="file" accept="application/json" /></label>
-      </div>
-    </section>
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-slate-200 pb-5">
+            <div class="flex items-center gap-3">
+                <div class="bg-red-500 text-white p-2.5 rounded-lg shadow-md shadow-red-100">
+                    <i class="fa-solid fa-kit-medical text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">ER Emergency Formulary</h1>
+                    <p class="text-sm text-slate-500">Quick-access drug dosing and indications</p>
+                </div>
+            </div>
+            
+            <div class="relative w-full md:w-96">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Search by drug name, indication, or tag..." 
+                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all">
+            </div>
+        </header>
 
-    <section id="formPanel" class="panel hidden">
-      <h2 id="formTitle">Add drug</h2>
-      <input id="name" placeholder="Drug name" />
-      <input id="adult" placeholder="Adult dose" />
-      <input id="peds" placeholder="Pediatric dose in brackets" />
-      <input id="indication" placeholder="Indication" />
-      <select id="category"></select>
-      <div class="actions two">
-        <button id="saveBtn">Save</button>
-        <button id="cancelBtn" class="secondary">Cancel</button>
-      </div>
-    </section>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-xl shadow-xs border border-slate-200 sticky top-6">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-blue-500"></i> Add New ER Drug
+                    </h2>
+                    <form id="drugForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Drug Name</label>
+                            <input type="text" id="drugName" required placeholder="e.g., Epinephrine, Amiodarone" 
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Indication</label>
+                            <input type="text" id="indication" required placeholder="e.g., Anaphylaxis, Cardiac Arrest" 
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Adult Dose</label>
+                                <textarea id="adultDose" required rows="2" placeholder="e.g., 0.3 mg IM" 
+                                    class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Pediatric Dose</label>
+                                <textarea id="peadsDose" required rows="2" placeholder="e.g., 0.01 mg/kg IM" 
+                                    class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Tags (Comma separated)</label>
+                            <input type="text" id="tags" placeholder="e.g., Resuscitation, Allergy, Sedative" 
+                                class="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <button type="submit" 
+                            class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs">
+                            <i class="fa-solid fa-floppy-disk"></i> Save to Database
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-    <section id="drugList"></section>
-  </main>
+            <div class="lg:col-span-2">
+                <div id="loadingState" class="text-center py-12 text-slate-400">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl mb-2"></i>
+                    <p class="text-sm">Connecting to Firebase...</p>
+                </div>
+                
+                <div id="emptyState" class="hidden text-center py-12 bg-white rounded-xl border border-dashed border-slate-300 text-slate-400">
+                    <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                    <p class="text-base font-medium text-slate-600">No drugs found</p>
+                    <p class="text-xs max-w-xs mx-auto mt-1">Add your first critical medication or clear your search filter.</p>
+                </div>
 
-  <footer>
-    Quick reference only. Confirm local protocols, concentrations, max doses, allergies, renal/hepatic adjustment, and patient-specific factors.
-  </footer>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  
-  <script src="app.js"></script>
+                <div id="drugGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA-clqoD7YiAxQbI1WRg4A5hhRup4YuyrE",
+  authDomain: "ed-drugs.firebaseapp.com",
+  projectId: "ed-drugs",
+  storageBucket: "ed-drugs.firebasestorage.app",
+  messagingSenderId: "101110196513",
+  appId: "1:101110196513:web:40559131c06e8254093660"
+};
+
+        // Initialize App & Services
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const drugsCollection = collection(db, "er_drugs");
+
+        // DOM elements
+        const drugForm = document.getElementById('drugForm');
+        const drugGrid = document.getElementById('drugGrid');
+        const searchInput = document.getElementById('searchInput');
+        const loadingState = document.getElementById('loadingState');
+        const emptyState = document.getElementById('emptyState');
+
+        let allDrugs = []; // Local memory cache for live filtering
+
+        // 1. Fetch data in real-time
+        onSnapshot(drugsCollection, (snapshot) => {
+            loadingState.classList.add('hidden');
+            allDrugs = [];
+            
+            snapshot.forEach((doc) => {
+                allDrugs.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Sort alphabetically by drug name
+            allDrugs.sort((a, b) => a.name.localeCompare(b.name));
+            
+            renderDrugs(allDrugs);
+        }, (error) => {
+            console.error("Firebase Read Error: ", error);
+            loadingState.innerHTML = `<p class="text-red-500"><i class="fa-solid fa-triangle-exclamation"></i> Failed to sync with database. Check API configurations.</p>`;
+        });
+
+        // 2. Render Drugs to UI
+        function renderDrugs(drugsList) {
+            drugGrid.innerHTML = '';
+            
+            if (drugsList.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            drugsList.forEach(drug => {
+                const tagBadges = drug.tags ? drug.tags.map(t => 
+                    `<span class="bg-slate-100 text-slate-600 text-[11px] font-medium px-2 py-0.5 rounded-sm border border-slate-200">${t.trim()}</span>`
+                ).join('') : '';
+
+                const cardHtml = `
+                    <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+                        <div class="p-5 flex-1">
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <h3 class="font-bold text-lg text-slate-900 tracking-tight capitalize">${drug.name}</h3>
+                                <button onclick="deleteDrug('${drug.id}')" class="text-slate-400 hover:text-red-500 p-1 rounded-sm hover:bg-red-50 transition-colors cursor-pointer" title="Delete Medication">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="mb-3 text-xs">
+                                <span class="font-semibold text-slate-400 uppercase tracking-wider block text-[10px]">Indication</span>
+                                <p class="text-slate-700 font-medium">${drug.indication}</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+                                <div class="bg-blue-50/50 p-2 rounded-md border border-blue-100/50">
+                                    <span class="font-bold text-blue-700 text-[10px] uppercase tracking-wider block mb-0.5"><i class="fa-solid fa-user text-[9px] mr-1"></i>Adult Dose</span>
+                                    <p class="text-xs text-slate-700 whitespace-pre-line font-medium">${drug.adultDose}</p>
+                                </div>
+                                <div class="bg-emerald-50/50 p-2 rounded-md border border-emerald-100/50">
+                                    <span class="font-bold text-emerald-700 text-[10px] uppercase tracking-wider block mb-0.5"><i class="fa-solid fa-child text-[9px] mr-1"></i>Peads Dose</span>
+                                    <p class="text-xs text-slate-700 whitespace-pre-line font-medium">${drug.peadsDose}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${tagBadges ? `<div class="bg-slate-50/70 px-5 py-2.5 border-t border-slate-100 flex flex-wrap gap-1.5">${tagBadges}</div>` : ''}
+                    </div>
+                `;
+                drugGrid.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // 3. Add Drug Submit Functionality
+        drugForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const rawTags = document.getElementById('tags').value;
+            const parsedTags = rawTags ? rawTags.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+
+            const newDrug = {
+                name: document.getElementById('drugName').value.trim(),
+                indication: document.getElementById('indication').value.trim(),
+                adultDose: document.getElementById('adultDose').value.trim(),
+                peadsDose: document.getElementById('peadsDose').value.trim(),
+                tags: parsedTags,
+                createdAt: new Date()
+            };
+
+            try {
+                await addDoc(drugsCollection, newDrug);
+                drugForm.reset();
+            } catch (error) {
+                alert("Error writing document to Firestore: " + error.message);
+            }
+        });
+
+        // 4. Delete Drug Functionality 
+        window.deleteDrug = async function(id) {
+            if (confirm("Are you sure you want to remove this drug from the quick-reference guide?")) {
+                try {
+                    await deleteDoc(doc(db, "er_drugs", id));
+                } catch (error) {
+                    alert("Error deleting record: " + error.message);
+                }
+            }
+        }
+
+        // 5. Search Filtering Functionality
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (!query) {
+                renderDrugs(allDrugs);
+                return;
+            }
+
+            const filtered = allDrugs.filter(drug => {
+                const nameMatch = drug.name.toLowerCase().includes(query);
+                const indicationMatch = drug.indication.toLowerCase().includes(query);
+                const tagMatch = drug.tags && drug.tags.some(tag => tag.toLowerCase().includes(query));
+                return nameMatch || indicationMatch || tagMatch;
+            });
+
+            renderDrugs(filtered);
+        });
+    </script>
 </body>
 </html>
